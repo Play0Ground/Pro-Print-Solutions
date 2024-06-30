@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProPrint Solutions - Invoice Generator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech&display=swap');
+
+        body {
+            font-family: 'Share Tech', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            background-color: #343a40;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%239C92AC' fill-opacity='0.25' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"), linear-gradient(to right top, #343a40, #2b2c31, #211f22, #151314, #000000);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px;
+            padding: 50px;
+            background-color: rgba(255, 255, 255, 0.85);
+            color: black;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+
+        .header, .form-container h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1, .header p, .form-container h1 {
+            margin: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .header p, .form-container label {
+            margin: 5px 0;
+            color: #777;
+        }
+
+        .invoice-details {
+            margin-bottom: 20px;
+        }
+
+        .invoice-details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .invoice-details th, .invoice-details td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .invoice-details th {
+            background-color: #f9f9f9;
+            text-align: left;
+        }
+
+        .invoice-footer {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .invoice-footer h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .form-group button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+
+        .form-group .reset-button {
+            background-color: #dc3545;
+        }
+
+        .form-group .reset-button:hover {
+            background-color: #c82333;
+        }
+
+        .form-group .create-another-button {
+            background-color: #28a745;
+        }
+
+        .form-group .create-another-button:hover {
+            background-color: #218838;
+        }
+
+        .form-group .download-button {
+            background-color: #28a745;
+        }
+
+        .form-group .download-button:hover {
+            background-color: #218838;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="home-page" class="container active">
+        <h1>Create Invoice</h1>
+        <div class="form-group">
+            <label for="client-name">Client Name</label>
+            <input type="text" id="client-name" required>
+        </div>
+        <div class="form-group">
+            <label for="client-surname">Client Surname</label>
+            <input type="text" id="client-surname" required>
+        </div>
+        <div class="form-group">
+            <label for="client-phone">Phone Number</label>
+            <input type="tel" id="client-phone" pattern="[0-9]{10}" maxlength="10" required>
+            <small>Format: 10 digits only</small>
+        </div>
+        <div class="form-group">
+            <label for="client-email">Email Address</label>
+            <input type="email" id="client-email" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Job Description</label>
+            <select id="description" required>
+                <option value="Black & White Single-Sheet">Black & White Single-Sheet</option>
+                <option value="Color Single-Sheet">Color Single-Sheet</option>
+                <option value="Black & White Double-Sided">Black & White Double-Sided</option>
+                <option value="Color Double-Sided">Color Double-Sided</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="pages">Number of Pages</label>
+            <input type="number" id="pages" required>
+        </div>
+        <div class="form-group">
+            <button type="button" onclick="generateInvoice()">Generate Invoice</button>
+        </div>
+        <div class="form-group">
+            <button type="button" class="reset-button" onclick="resetInvoiceCount()">Reset Invoice Count</button>
+        </div>
+        <div class="form-group">
+            <p>Total Number of Invoices: <span id="invoice-count">0</span></p>
+        </div>
+    </div>
+
+    <div id="invoice-page" class="container">
+        <div class="header">
+            <h1>Pro Print Solutions</h1>
+            <p>Block 24 House 001 Ekhaya Juction</p>
+            <p>Phone: 072 617 1976 | Email: playgroundtest0@gmail.com</p>
+            <p id="invoice-number"></p>
+        </div>
+        <div id="client-details"></div>
+        <div class="invoice-details">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Pages</th>
+                        <th>Type</th>
+                        <th>Price per Page (Rands)</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="invoice-body"></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" style="text-align:right"><strong>Total:</strong></td>
+                        <td id="invoice-total"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div class="invoice-footer">
+            <h2 id="grand-total"></h2>
+        </div>
+        <div class="form-group" style="text-align: center;">
+            <button type="button" class="download-button" onclick="exportPDF()">Download Invoice</button>
+            <button type="button" class="create-another-button" onclick="createAnotherInvoice()">Create Another Invoice</button>
+            <button type="button" onclick="openModal()">Add Job Print</button>
+            <button type="button" onclick="deleteJobPrint()">Delete Job Print</button>
+        </div>
+    </div>
+
+    <div id="jobPrintModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Add Job Print</h2>
+            <div class="form-group">
+                <label for="modal-description">Job Description</label>
+                <select id="modal-description" required>
+                    <option value="Black & White Single-Sheet">Black & White Single-Sheet</option>
+                    <option value="Color Single-Sheet">Color Single-Sheet</option>
+                    <option value="Black & White Double-Sided">Black & White Double-Sided</option>
+                    <option value="Color Double-Sided">Color Double-Sided</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modal-pages">Number of Pages</label>
+                <input type="number" id="modal-pages" required>
+            </div>
+            <div class="form-group">
+                <button type="button" onclick="addJobPrintFromModal()">Add Job Print</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script>
+        let invoiceCount = parseInt(localStorage.getItem('invoiceCount')) || 0;
+        document.getElementById('invoice-count').innerText = invoiceCount;
+
+        function generateInvoice() {
+            const clientName = document.getElementById('client-name').value.trim();
+            const clientSurname = document.getElementById('client-surname').value.trim();
+            const clientPhone = document.getElementById('client-phone').value.trim();
+            const clientEmail = document.getElementById('client-email').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const pages = parseInt(document.getElementById('pages').value);
+
+            if (!clientName || !clientSurname || !clientPhone || !clientEmail || !description || !pages) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            let pricePerPage;
+            let type;
+            if (description.includes('Single-Sheet')) {
+                pricePerPage = description.includes('Black & White') ? 2.50 : 5.00;
+                type = 'Single-Sided';
+            } else {
+                pricePerPage = description.includes('Black & White') ? 1.25 : 2.50;
+                type = 'Double-Sided';
+            }
+
+            const total = pricePerPage * pages;
+
+            invoiceCount += 1;
+            localStorage.setItem('invoiceCount', invoiceCount);
+
+            document.getElementById('invoice-number').innerText = `Invoice Number: ${invoiceCount}`;
+            document.getElementById('client-details').innerHTML = `
+                <p>Client: ${clientName} ${clientSurname}</p>
+                <p>Phone: ${clientPhone} | Email: ${clientEmail}</p>
+            `;
+
+            document.getElementById('invoice-body').innerHTML = `
+                <tr>
+                    <td>${description}</td>
+                    <td>${pages}</td>
+                    <td>${type}</td>
+                    <td>${pricePerPage.toFixed(2)}</td>
+                    <td>${total.toFixed(2)}</td>
+                </tr>
+            `;
+
+            document.getElementById('invoice-total').innerText = total.toFixed(2);
+            document.getElementById('grand-total').innerText = `Grand Total: ${total.toFixed(2)} Rands`;
+
+            document.getElementById('home-page').classList.remove('active');
+            document.getElementById('invoice-page').classList.add('active');
+        }
+
+        function resetInvoiceCount() {
+            invoiceCount = 0;
+            localStorage.setItem('invoiceCount', invoiceCount);
+            alert('Invoice count has been reset.');
+            document.getElementById('invoice-count').innerText = invoiceCount;
+        }
+
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            pdf.html(document.querySelector('#invoice-page'), {
+                callback: function (pdf) {
+                    pdf.save(`Invoice_${invoiceCount}.pdf`);
+                }
+            });
+        }
+
+        function createAnotherInvoice() {
+            document.getElementById('invoice-page').classList.remove('active');
+            document.getElementById('home-page').classList.add('active');
+            document.getElementById('client-name').value = '';
+            document.getElementById('client-surname').value = '';
+            document.getElementById('client-phone').value = '';
+            document.getElementById('client-email').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('pages').value = '';
+        }
+
+        function openModal() {
+            document.getElementById('jobPrintModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('jobPrintModal').style.display = 'none';
+        }
+
+        function addJobPrintFromModal() {
+            const description = document.getElementById('modal-description').value.trim();
+            const pages = parseInt(document.getElementById('modal-pages').value);
+
+            if (!description || !pages) {
+                alert('Please fill in job description and number of pages.');
+                return;
+            }
+
+            let pricePerPage;
+            let type;
+            if (description.includes('Single-Sheet')) {
+                pricePerPage = description.includes('Black & White') ? 2.50 : 5.00;
+                type = 'Single-Sided';
+            } else {
+                pricePerPage = description.includes('Black & White') ? 1.25 : 2.50;
+                type = 'Double-Sided';
+            }
+
+            const total = pricePerPage * pages;
+
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${description}</td>
+                <td>${pages}</td>
+                <td>${type}</td>
+                <td>${pricePerPage.toFixed(2)}</td>
+                <td>${total.toFixed(2)}</td>
+            `;
+            document.getElementById('invoice-body').appendChild(newRow);
+
+            updateTotal();
+            closeModal();
+        }
+
+        function deleteJobPrint() {
+            const tbody = document.getElementById('invoice-body');
+            if (tbody.rows.length > 0) {
+                tbody.deleteRow(tbody.rows.length - 1);
+                updateTotal();
+            } else {
+                alert('No job prints to delete.');
+            }
+        }
+
+        function updateTotal() {
+            const rows = document.getElementById('invoice-body').rows;
+            let grandTotal = 0;
+            for (let i = 0; i < rows.length; i++) {
+                const totalCell = rows[i].cells[4];
+                grandTotal += parseFloat(totalCell.innerText);
+            }
+            document.getElementById('invoice-total').innerText = grandTotal.toFixed(2);
+            document.getElementById('grand-total').innerText = `Grand Total: ${grandTotal.toFixed(2)} Rands`;
+        }
+    </script>
+</body>
+</html>
