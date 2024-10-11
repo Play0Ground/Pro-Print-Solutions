@@ -1,9 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProPrint Solutions - Invoice Generator</title>
+
+    <!-- CDNs for Enhancements -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hover.css/2.3.1/css/hover-min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech&display=swap');
 
@@ -33,18 +44,22 @@
             display: block;
         }
 
-        .header, .form-container h1 {
+        .header,
+        .form-container h1 {
             text-align: center;
             margin-bottom: 20px;
         }
 
-        .header h1, .header p, .form-container h1 {
+        .header h1,
+        .header p,
+        .form-container h1 {
             margin: 20px;
             font-size: 24px;
             color: #333;
         }
 
-        .header p, .form-container label {
+        .header p,
+        .form-container label {
             margin: 5px 0;
             color: #777;
         }
@@ -58,7 +73,8 @@
             border-collapse: collapse;
         }
 
-        .invoice-details th, .invoice-details td {
+        .invoice-details th,
+        .invoice-details td {
             padding: 10px;
             border: 1px solid #ddd;
         }
@@ -87,7 +103,8 @@
             margin-bottom: 5px;
         }
 
-        .form-group input, .form-group select {
+        .form-group input,
+        .form-group select {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
@@ -131,6 +148,14 @@
             background-color: #218838;
         }
 
+        .form-group .download-link {
+            background-color: #17a2b8;
+        }
+
+        .form-group .download-link:hover {
+            background-color: #138496;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -166,11 +191,59 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        /* Button styles for Edit and Delete */
+        .edit-button,
+        .delete-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin: 0 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+        }
+
+        .edit-button:hover {
+            background-color: #0056b3;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+
+        /* CSS for Download PDF button */
+.download-link {
+    display: block;
+    margin: 10px auto;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    max-width: 50.8vh;
+}
+
+.download-link:hover {
+    background-color: #218838;
+}
+
     </style>
 </head>
+
 <body>
-    <div id="home-page" class="container active">
+    <!-- Home Page -->
+    <div id="home-page" class="container active" data-aos="fade-right">
         <h1>Create Invoice</h1>
+        <!-- Form for client information -->
         <div class="form-group">
             <label for="client-name">Client Name</label>
             <input type="text" id="client-name" required>
@@ -182,11 +255,12 @@
         <div class="form-group">
             <label for="client-phone">Phone Number</label>
             <input type="tel" id="client-phone" pattern="[0-9]{10}" maxlength="10" required>
-            <small>Format: 10 digits only</small>
+            <small id="phone-error" style="color: red; display: none;">Please enter a valid 10-digit phone number.</small>
         </div>
         <div class="form-group">
             <label for="client-email">Email Address</label>
             <input type="email" id="client-email" required>
+            <small id="email-error" style="color: red; display: none;">Please enter a valid email address.</small>
         </div>
         <div class="form-group">
             <label for="description">Job Description</label>
@@ -212,11 +286,12 @@
         </div>
     </div>
 
-    <div id="invoice-page" class="container">
+    <!-- Invoice Page -->
+    <div id="invoice-page" class="container" data-aos="fade-left">
         <div class="header">
             <h1>Pro Print Solutions</h1>
-            <p>Block 24 House 001 Ekhaya Juction</p>
-            <p>Phone: 072 617 1976 | Email: playgroundtest0@gmail.com</p>
+            <p>Block 24 House 001 Ekhaya Junction</p>
+            <p>Phone: <a href="tel:0726171976">072 617 1976</a> | Email: <a href="mailto:playgroundtest0@gmail.com">playgroundtest0@gmail.com</a></p>
             <p id="invoice-number"></p>
         </div>
         <div id="client-details"></div>
@@ -229,6 +304,7 @@
                         <th>Type</th>
                         <th>Price per Page (Rands)</th>
                         <th>Total</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="invoice-body"></tbody>
@@ -246,15 +322,17 @@
         <div class="form-group" style="text-align: center;">
             <button type="button" class="download-button" onclick="exportPDF()">Download Invoice</button>
             <button type="button" class="create-another-button" onclick="createAnotherInvoice()">Create Another Invoice</button>
-            <button type="button" onclick="openModal()">Add Job Print</button>
-            <button type="button" onclick="deleteJobPrint()">Delete Job Print</button>
+            <button type="button" onclick="openModal('add')">Add a Job Print</button>
+            <!-- New Download Link Button -->
+            <a id="pdf-download-btn" class="download-link" style="display: none;">Download PDF</a>
         </div>
     </div>
 
+    <!-- Modal for Adding/Editing Job Prints -->
     <div id="jobPrintModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
-            <h2>Add Job Print</h2>
+            <h2 id="modal-title">Add Job Print</h2>
             <div class="form-group">
                 <label for="modal-description">Job Description</label>
                 <select id="modal-description" required>
@@ -269,66 +347,135 @@
                 <input type="number" id="modal-pages" required>
             </div>
             <div class="form-group">
-                <button type="button" onclick="addJobPrintFromModal()">Add Job Print</button>
+                <button type="button" id="modal-action-button" onclick="addJobPrintFromModal()">Add Job Print</button>
             </div>
         </div>
     </div>
 
+    <!-- JS Libraries and CDN links for functionality -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.1/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+
     <script>
+        AOS.init();
+
         let invoiceCount = parseInt(localStorage.getItem('invoiceCount')) || 0;
         document.getElementById('invoice-count').innerText = invoiceCount;
 
-        function generateInvoice() {
-            const clientName = document.getElementById('client-name').value.trim();
-            const clientSurname = document.getElementById('client-surname').value.trim();
-            const clientPhone = document.getElementById('client-phone').value.trim();
-            const clientEmail = document.getElementById('client-email').value.trim();
-            const description = document.getElementById('description').value.trim();
-            const pages = parseInt(document.getElementById('pages').value);
+        let editingRow = null; // Track the row that is being edited
 
-            if (!clientName || !clientSurname || !clientPhone || !clientEmail || !description || !pages) {
-                alert('Please fill in all fields.');
-                return;
-            }
+     // Replace this with your actual Web App URL
+const scriptURL = 'https://script.google.com/macros/s/AKfycbx-X5xNeFYJsUj4HuOvkQpLtUb3aCjXJVhQcS8wRllhWRch2s92MxCClrb8wgZAkMIC/exec';
 
-            let pricePerPage;
-            let type;
-            if (description.includes('Single-Sheet')) {
-                pricePerPage = description.includes('Black & White') ? 2.50 : 5.00;
-                type = 'Single-Sided';
-            } else {
-                pricePerPage = description.includes('Black & White') ? 1.25 : 2.50;
-                type = 'Double-Sided';
-            }
+// Function to send data to Google Sheets
+function sendInvoiceToSheet(clientName, clientSurname, clientPhone, clientEmail, description, pages, type, pricePerPage, total) {
+    const data = {
+        clientName: clientName,
+        clientSurname: clientSurname,
+        clientPhone: clientPhone,
+        clientEmail: clientEmail,
+        jobDescription: description,
+        pages: pages,
+        type: type,
+        pricePerPage: pricePerPage,
+        total: total
+    };
 
-            const total = pricePerPage * pages;
-
-            invoiceCount += 1;
-            localStorage.setItem('invoiceCount', invoiceCount);
-
-            document.getElementById('invoice-number').innerText = `Invoice Number: ${invoiceCount}`;
-            document.getElementById('client-details').innerHTML = `
-                <p>Client: ${clientName} ${clientSurname}</p>
-                <p>Phone: ${clientPhone} | Email: ${clientEmail}</p>
-            `;
-
-            document.getElementById('invoice-body').innerHTML = `
-                <tr>
-                    <td>${description}</td>
-                    <td>${pages}</td>
-                    <td>${type}</td>
-                    <td>${pricePerPage.toFixed(2)}</td>
-                    <td>${total.toFixed(2)}</td>
-                </tr>
-            `;
-
-            document.getElementById('invoice-total').innerText = total.toFixed(2);
-            document.getElementById('grand-total').innerText = `Grand Total: ${total.toFixed(2)} Rands`;
-
-            document.getElementById('home-page').classList.remove('active');
-            document.getElementById('invoice-page').classList.add('active');
+    fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json'
         }
+    })
+    .then(response => response.json())
+    .then(response => {
+        console.log('Success:', response);
+    })
+    .catch(error => console.error('Error!', error.message));
+}
+
+function generateInvoice() {
+    // Collect information from the form
+    const clientName = document.getElementById('client-name').value.trim();
+    const clientSurname = document.getElementById('client-surname').value.trim();
+    const clientPhone = document.getElementById('client-phone').value.trim();
+    const clientEmail = document.getElementById('client-email').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const pages = parseInt(document.getElementById('pages').value);
+
+    // Validation
+    document.getElementById('phone-error').style.display = 'none';
+    document.getElementById('email-error').style.display = 'none';
+
+    if (!/^\d{10}$/.test(clientPhone)) {
+        document.getElementById('phone-error').style.display = 'block';
+        return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail)) {
+        document.getElementById('email-error').style.display = 'block';
+        return;
+    }
+
+    if (!clientName || !clientSurname || !clientPhone || !clientEmail || !description || !pages) {
+        alert('Please fill in all fields.');
+        return;
+    }
+
+    // Price Calculation
+    let pricePerPage;
+    let type;
+    if (description.includes('Single-Sheet')) {
+        pricePerPage = description.includes('Black & White') ? 2.50 : 5.00;
+        type = 'Single-Sided';
+    } else {
+        pricePerPage = description.includes('Black & White') ? 1.25 : 2.50;
+        type = 'Double-Sided';
+    }
+
+    const total = pricePerPage * pages;
+
+    // Send the invoice data to Google Sheets
+    sendInvoiceToSheet(clientName, clientSurname, clientPhone, clientEmail, description, pages, type, pricePerPage.toFixed(2), total.toFixed(2));
+
+    // Update the UI
+    invoiceCount += 1;
+    localStorage.setItem('invoiceCount', invoiceCount);
+
+    document.getElementById('invoice-number').innerText = `Invoice Number: ${invoiceCount}`;
+    document.getElementById('client-details').innerHTML = `
+        <p>Client: ${clientName} ${clientSurname}</p>
+        <p>Phone: <a href="tel:${clientPhone}">${clientPhone}</a> | Email: <a href="mailto:${clientEmail}">${clientEmail}</a></p>
+    `;
+
+    // Set the initial job print
+    document.getElementById('invoice-body').innerHTML = `
+        <tr>
+            <td>${description}</td>
+            <td>${pages}</td>
+            <td>${type}</td>
+            <td>${pricePerPage.toFixed(2)}</td>
+            <td>${total.toFixed(2)}</td>
+            <td>
+                <button class="edit-button" onclick="openModal('edit', this.closest('tr'))">Edit</button>
+                <button class="delete-button" onclick="deleteJobPrint(this)">Delete</button>
+            </td>
+        </tr>
+    `;
+
+    updateTotal();
+
+    document.getElementById('home-page').classList.remove('active');
+    document.getElementById('invoice-page').classList.add('active');
+}
+
 
         function resetInvoiceCount() {
             invoiceCount = 0;
@@ -340,11 +487,70 @@
         function exportPDF() {
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'a4');
-            pdf.html(document.querySelector('#invoice-page'), {
-                callback: function (pdf) {
-                    pdf.save(`Invoice_${invoiceCount}.pdf`);
-                }
+            const pageWidth = pdf.internal.pageSize.getWidth();
+
+            // Retrieve client name and surname from input fields
+            const clientName = document.getElementById('client-name').value.trim();
+            const clientSurname = document.getElementById('client-surname').value.trim();
+            const clientPhone = document.getElementById('client-phone').value;
+            const clientEmail = document.getElementById('client-email').value;
+
+            const invoiceNumber = document.getElementById('invoice-number').innerText.split(' ')[2];
+
+            // Generate the filename with the client name and surname
+            const filename = `${clientName}_${clientSurname}_inv${invoiceNumber}.pdf`;
+
+            // Add title and header information
+            pdf.setFontSize(16);
+            pdf.text('Pro Print Solutions', pageWidth / 2, 15, { align: 'center' });
+            pdf.setFontSize(12);
+            pdf.text('Block 24 House 001 Ekhaya Junction', pageWidth / 2, 25, { align: 'center' });
+
+            const contactText = 'Phone: 072 617 1976 | Email: playgroundtest0@gmail.com';
+            const contactXPos = (pageWidth - pdf.getTextWidth(contactText)) / 2;
+
+            pdf.textWithLink('Phone: 072 617 1976', contactXPos, 30, { url: 'tel:0726171976' });
+            const emailXPos = contactXPos + pdf.getTextWidth('Phone: 072 617 1976 | ');
+            pdf.textWithLink('| Email: playgroundtest0@gmail.com', emailXPos, 30, { url: 'mailto:playgroundtest0@gmail.com' });
+
+            pdf.text(`Invoice Number: ${invoiceNumber}`, 15, 40);
+            pdf.text(`Client: ${clientName} ${clientSurname}`, 15, 50);
+            pdf.textWithLink(`Phone: ${clientPhone}`, 15, 60, { url: `tel:${clientPhone}` });
+            pdf.textWithLink(`Email: ${clientEmail}`, 15, 70, { url: `mailto:${clientEmail}` });
+
+            pdf.autoTable({
+                startY: 75,
+                head: [['Description', 'Pages', 'Type', 'Price per Page (Rands)', 'Total']],
+                body: Array.from(document.querySelectorAll('#invoice-body tr')).map(row =>
+                    Array.from(row.children).map(cell => cell.innerText)
+                ),
+                theme: 'grid',
+                headStyles: { fillColor: [25, 188, 155] },
             });
+
+            const grandTotal = document.getElementById('grand-total').innerText;
+            pdf.setFontSize(14);
+            pdf.text(grandTotal, 15, pdf.lastAutoTable.finalY + 20);
+
+            // Add a thank you message
+            pdf.setTextColor(163, 65, 64);
+            const thankYouMessage = 'Thank you for your support!';
+            pdf.text(thankYouMessage, pageWidth / 2, pdf.lastAutoTable.finalY + 35, { align: 'center' });
+
+            pdf.setTextColor(0, 0, 0);
+
+            // Convert PDF to Blob and open in a new tab
+            const pdfBlob = pdf.output('blob');
+            const url = URL.createObjectURL(pdfBlob);
+
+            // Open PDF in new tab
+            window.open(url);
+
+            // Set up the existing hidden button for the download
+            const downloadBtn = document.getElementById('pdf-download-btn');
+            downloadBtn.href = url;
+            downloadBtn.download = filename;
+            downloadBtn.style.display = 'block'; // Show the button for download
         }
 
         function createAnotherInvoice() {
@@ -356,9 +562,26 @@
             document.getElementById('client-email').value = '';
             document.getElementById('description').value = '';
             document.getElementById('pages').value = '';
+            document.getElementById('pdf-download-btn').style.display = 'none';
         }
 
-        function openModal() {
+        function openModal(mode, row = null) {
+            if (mode === 'edit') {
+                // Edit Mode: Update modal for editing
+                document.getElementById('modal-title').innerText = 'Edit Job Print';
+                document.getElementById('modal-action-button').innerText = 'Save Changes';
+                editingRow = row; // Save row reference
+                // Prepopulate values from the row
+                document.getElementById('modal-description').value = row.cells[0].innerText;
+                document.getElementById('modal-pages').value = row.cells[1].innerText;
+            } else {
+                // Add Mode: Set modal for adding
+                document.getElementById('modal-title').innerText = 'Add Job Print';
+                document.getElementById('modal-action-button').innerText = 'Add Job Print';
+                editingRow = null;
+                document.getElementById('modal-description').value = '';
+                document.getElementById('modal-pages').value = '';
+            }
             document.getElementById('jobPrintModal').style.display = 'block';
         }
 
@@ -375,6 +598,7 @@
                 return;
             }
 
+            // Calculate price per page and total
             let pricePerPage;
             let type;
             if (description.includes('Single-Sheet')) {
@@ -387,28 +611,38 @@
 
             const total = pricePerPage * pages;
 
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td>${description}</td>
-                <td>${pages}</td>
-                <td>${type}</td>
-                <td>${pricePerPage.toFixed(2)}</td>
-                <td>${total.toFixed(2)}</td>
-            `;
-            document.getElementById('invoice-body').appendChild(newRow);
+            if (editingRow) {
+                // Edit Existing Job Print
+                editingRow.cells[0].innerText = description;
+                editingRow.cells[1].innerText = pages;
+                editingRow.cells[2].innerText = type;
+                editingRow.cells[3].innerText = pricePerPage.toFixed(2);
+                editingRow.cells[4].innerText = total.toFixed(2);
+            } else {
+                // Add New Job Print
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${description}</td>
+                    <td>${pages}</td>
+                    <td>${type}</td>
+                    <td>${pricePerPage.toFixed(2)}</td>
+                    <td>${total.toFixed(2)}</td>
+                    <td>
+                        <button class="edit-button" onclick="openModal('edit', this.closest('tr'))">Edit</button>
+                        <button class="delete-button" onclick="deleteJobPrint(this)">Delete</button>
+                    </td>
+                `;
+                document.getElementById('invoice-body').appendChild(newRow);
+            }
 
             updateTotal();
             closeModal();
         }
 
-        function deleteJobPrint() {
-            const tbody = document.getElementById('invoice-body');
-            if (tbody.rows.length > 0) {
-                tbody.deleteRow(tbody.rows.length - 1);
-                updateTotal();
-            } else {
-                alert('No job prints to delete.');
-            }
+        function deleteJobPrint(button) {
+            const row = button.closest('tr');
+            row.remove();
+            updateTotal();
         }
 
         function updateTotal() {
@@ -422,5 +656,7 @@
             document.getElementById('grand-total').innerText = `Grand Total: ${grandTotal.toFixed(2)} Rands`;
         }
     </script>
+
 </body>
+
 </html>
